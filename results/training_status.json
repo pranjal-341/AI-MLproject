@@ -1,0 +1,152 @@
+{
+  "profile": "practical-v1",
+  "rows": 100537,
+  "development_rows": 80429,
+  "test_rows": 20108,
+  "tuning_rows": 15000,
+  "seed": 42,
+  "tracks": {
+    "linear_regression": {
+      "state": "exported",
+      "tiers": {
+        "A": {
+          "parameters": {},
+          "validation_RMSE": 1.026978113287522,
+          "test_metrics": {
+            "R2": 0.11670724395460663,
+            "RMSE": 1.0315179597558886,
+            "MAE": 0.7483092492349491,
+            "Pearson": 0.3416706749594671,
+            "Spearman": 0.35388358283033305
+          },
+          "elapsed_seconds": 3.57
+        },
+        "B": {
+          "parameters": {
+            "model__alpha": 100.0
+          },
+          "validation_RMSE": 1.0249752937783074,
+          "test_metrics": {
+            "R2": 0.11608899877271084,
+            "RMSE": 1.0318788930088718,
+            "MAE": 0.747958300825897,
+            "Pearson": 0.34072054292510956,
+            "Spearman": 0.35409884257717456
+          },
+          "elapsed_seconds": 4.31
+        },
+        "C": {
+          "parameters": {
+            "model__alpha": 100.0
+          },
+          "validation_RMSE": 1.0246192325970913,
+          "test_metrics": {
+            "R2": 0.11838452139917299,
+            "RMSE": 1.0305381238438887,
+            "MAE": 0.7469864588965683,
+            "Pearson": 0.34409856871041095,
+            "Spearman": 0.35683332929956585
+          },
+          "elapsed_seconds": 15.87
+        }
+      }
+    },
+    "decision_tree": {
+      "state": "exported",
+      "tiers": {
+        "A": {
+          "parameters": {
+            "model__max_depth": 20,
+            "model__min_samples_leaf": 5
+          },
+          "validation_RMSE": 0.6525369361373418,
+          "test_metrics": {
+            "R2": 0.8012200547129734,
+            "RMSE": 0.48934002841283275,
+            "MAE": 0.22401173356821577,
+            "Pearson": 0.8957433260000771,
+            "Spearman": 0.8733537464162053
+          },
+          "elapsed_seconds": 11.1
+        },
+        "B": {
+          "parameters": {
+            "model__max_depth": 20,
+            "model__min_samples_leaf": 5
+          },
+          "validation_RMSE": 0.6514361357995382,
+          "test_metrics": {
+            "R2": 0.7983156278360548,
+            "RMSE": 0.4929020032864992,
+            "MAE": 0.22492429145684836,
+            "Pearson": 0.8941955791472133,
+            "Spearman": 0.8722138680974294
+          },
+          "elapsed_seconds": 11.93
+        },
+        "C": {
+          "parameters": {
+            "model__max_depth": 20,
+            "model__min_samples_leaf": 5
+          },
+          "validation_RMSE": 0.6753115047748199,
+          "test_metrics": {
+            "R2": 0.8365449556981998,
+            "RMSE": 0.44373493653312795,
+            "MAE": 0.175027413137313,
+            "Pearson": 0.9157682104735976,
+            "Spearman": 0.9001627788110964
+          },
+          "elapsed_seconds": 99.9
+        }
+      }
+    },
+    "random_forest": {
+      "state": "exported",
+      "tiers": {
+        "A": {
+          "parameters": {
+            "model__max_depth": 18
+          },
+          "validation_RMSE": 0.4618496225678842,
+          "test_metrics": {
+            "R2": 0.89788924234373,
+            "RMSE": 0.3507197386288403,
+            "MAE": 0.18422913080806272,
+            "Pearson": 0.9501700116978722,
+            "Spearman": 0.9461260607501647
+          },
+          "elapsed_seconds": 216.15
+        },
+        "B": {
+          "parameters": {
+            "model__max_depth": 18
+          },
+          "validation_RMSE": 0.4635525994734681,
+          "test_metrics": {
+            "R2": 0.8963649811040648,
+            "RMSE": 0.35332773139772133,
+            "MAE": 0.18640289200063365,
+            "Pearson": 0.9492814351090489,
+            "Spearman": 0.9448342151514637
+          },
+          "elapsed_seconds": 506.82
+        },
+        "C": {
+          "parameters": {
+            "model__max_depth": 18
+          },
+          "validation_RMSE": 0.5055441430925274,
+          "test_metrics": {
+            "R2": 0.8930195078909116,
+            "RMSE": 0.3589853744119082,
+            "MAE": 0.1773559286236795,
+            "Pearson": 0.9468171597055373,
+            "Spearman": 0.943281008760751
+          },
+          "elapsed_seconds": 1181.87
+        }
+      }
+    }
+  }
+}

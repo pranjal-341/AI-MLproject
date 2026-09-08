@@ -1,0 +1,16 @@
+venv/
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.env
+
+.env.*
+!.env.example
+
+# Deployment output and local configuration
+.vercel/
+frontend/.vercel/
+.coverage
+htmlcov/
+*.log

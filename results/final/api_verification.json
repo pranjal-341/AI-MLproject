@@ -1,0 +1,51 @@
+{
+  "anonymous_requests_rejected": true,
+  "auth_validation": "mocked Supabase authenticated user; real model artifacts and predictions",
+  "models": [
+    {
+      "algorithm": "linear_regression",
+      "variant": "model_A",
+      "prediction_parity": true
+    },
+    {
+      "algorithm": "linear_regression",
+      "variant": "model_B",
+      "prediction_parity": true
+    },
+    {
+      "algorithm": "linear_regression",
+      "variant": "model_C",
+      "prediction_parity": true
+    },
+    {
+      "algorithm": "decision_tree",
+      "variant": "model_A",
+      "prediction_parity": true
+    },
+    {
+      "algorithm": "decision_tree",
+      "variant": "model_B",
+      "prediction_parity": true
+    },
+    {
+      "algorithm": "decision_tree",
+      "variant": "model_C",
+      "prediction_parity": true
+    },
+    {
+      "algorithm": "random_forest",
+      "variant": "model_A",
+      "prediction_parity": true
+    },
+    {
+      "algorithm": "random_forest",
+      "variant": "model_B",
+      "prediction_parity": true
+    },
+    {
+      "algorithm": "random_forest",
+      "variant": "model_C",
+      "prediction_parity": true
+    }
+  ]
+}
