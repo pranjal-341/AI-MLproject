@@ -6,7 +6,7 @@ OncoBind-ML is a research application for estimating changes in protein-drug bin
 
 **Research prototype:** predictions are model estimates. The application is not clinically validated and does not recommend treatment.
 
-[Quick start](#quick-start) | [Model evaluation](#model-evaluation) | [Architecture](#architecture) | [Vercel deployment](docs/DEPLOYMENT.md) | [Research methodology](research/methodology.md) | [Backend reference](backend/README.md)
+[Project guide](docs/PROJECT_GUIDE.md) | [Presentation](presentation/README.md) | [Quick start](#quick-start) | [Model evaluation](#model-evaluation) | [Architecture](#architecture) | [Vercel deployment](docs/DEPLOYMENT.md) | [Research methodology](research/methodology.md) | [Backend reference](backend/README.md)
 
 ## What works today
 
@@ -46,37 +46,45 @@ The Python backend must be reachable over HTTPS in production. Deploying the fro
 
 ```text
 OncoBind-ML/
-|-- frontend/                 React, TanStack Start, Tailwind CSS, Supabase client
-|   |-- src/components/       Landing page, dashboard, biological prediction console
-|   |-- src/routes/           Homepage and authentication routes
-|   |-- public/               Images and public assets
-|   |-- .env.example          Public frontend configuration template
-|   `-- vercel.json           Vercel framework and build configuration
+|-- frontend/                  Web application; Vercel project root
+|   |-- src/routes/            URL definitions and page composition
+|   |-- src/features/          Auth, landing, catalog, dashboard, prediction
+|   |-- src/components/        Shared layout, motion and UI primitives
+|   |-- src/integrations/      Supabase and platform adapters
+|   `-- scripts/               Frontend deployment preflight and checks
 |-- backend/
-|   |-- app/api/              Authentication, prediction, models, dashboard APIs
-|   |-- app/schemas/          Validated request and response contracts
-|   |-- app/services/         Identity resolution, preprocessing, model loading
-|   |-- app/core/             Configuration and token validation
-|   |-- training/             Notebook runners, practical training, export, reporting
-|   `-- Dockerfile            Container for the Python inference service
-|-- models/                   Algorithm/tier artifacts, metrics, schemas, metadata
-|-- data/                     Raw MdrDB CSV, processed tiers, example inputs
-|-- notebooks/                Uploaded research notebooks
-|-- results/                  Evaluation tables, predictions, plots, training reports
-|-- research/                 Methodology and references
-|-- database/                 Authentication configuration notes
-|-- tests/                    API, authentication, inference and integration tests
-|-- docs/                     Deployment and GitHub publication guides
-`-- .github/workflows/        Automated frontend and backend checks
+|   |-- app/api/               HTTP routes and authentication boundary
+|   |-- app/schemas/           Request/response validation
+|   |-- app/services/          Identity resolution, preprocessing and inference
+|   |-- app/core/              Runtime configuration and token validation
+|   `-- training/              Offline train, export, report and verification
+|-- data/                      Raw source, processed tiers and samples
+|-- models/                    Versioned algorithm/tier serving artifacts
+|-- notebooks/                 Source experiments by algorithm
+|-- results/                   Generated metrics, predictions, plots and reports
+|-- research/                  Methodology and references
+|-- tests/
+|   |-- unit/                  Isolated preprocessing checks
+|   `-- integration/           API, auth, biological flow and export checks
+|-- scripts/                   Common project task runner
+|-- docs/                      Architecture, development and deployment guides
+|-- presentation/              Demo runbook, input example, screenshots and slides
+|-- database/                  Supabase ownership notes (no password database)
+`-- .github/workflows/         Automated checks
 ```
+
+For a classroom walkthrough, start with the [project guide](docs/PROJECT_GUIDE.md) and [demo runbook](presentation/DEMO.md). The [documentation index](docs/README.md) links each technical area.
 
 ## Quick start
 
 ### Prerequisites
 
 - Node.js **24.x** and npm; `frontend/package-lock.json` is the npm lockfile.
+
 - Python **3.13** for the currently exported artifacts.
+
 - Git LFS for the large CSV and model files, or equivalent local artifact provisioning.
+
 - A Supabase project with email/password authentication configured.
 
 The dependency versions recorded with the supplied models are in [requirements-trained.txt](backend/requirements-trained.txt). Preserve compatible scikit-learn/joblib versions when loading these artifacts.
@@ -130,8 +138,11 @@ Open `http://localhost:3000`. The example configuration uses the backend's restr
 ### 4. Run a prediction
 
 1. Sign in and open the biological prediction console.
+
 2. Select a ready model, or keep RF / Tier A.
+
 3. Choose **Load dataset example**, then **Predict DDG**.
+
 4. Alternatively, enter a protein ID, mutation, and PubChem CID/SMILES. Select a specific sample if multiple structures match.
 
 The result separates the model prediction from the recorded experimental DDG. Both use the MdrDB target units, kcal/mol. A record in the source dataset may have participated in model fitting; its prediction is not independent evidence of generalization.
@@ -141,8 +152,11 @@ The result separates the model prediction from the recorded experimental DDG. Bo
 The supplied artifacts use the **practical-v1** training profile: bounded tuning followed by a seeded random-row holdout. This profile is not the original notebooks' exhaustive parameter search.
 
 - Dataset: **100,537 rows**, **168 columns**; target `DDG.EXP`.
+
 - Development set: **80,429 rows**; locked test set: **20,108 rows**; seed **42**.
+
 - Raw feature tiers: **A = 51**, **B = 57**, **C = 146** descriptors.
+
 - Tier B/C preprocessing includes algorithm-specific engineered features; these are computed inside the saved predictor.
 
 | Algorithm | Tier | R2 | RMSE | MAE |
@@ -156,7 +170,6 @@ The supplied artifacts use the **practical-v1** training profile: bounded tuning
 | Random forest | A | 0.8979 | 0.3507 | 0.1842 |
 | Random forest | B | 0.8964 | 0.3533 | 0.1864 |
 | Random forest | C | 0.8930 | 0.3590 | 0.1774 |
-
 
 Scores are transcribed from [all_models_comparison.csv](results/final/all_models_comparison.csv). The application itself reads each artifact's `metrics.json` and `metadata.json`, and groups comparisons by dataset/test-split hashes. See [evaluation report](results/final/model_evaluation.md) and [comparison plots](results/plots/comparison/).
 
@@ -203,8 +216,11 @@ Prediction requests use `Authorization: Bearer <user-access-token>`. Invalid cre
 Use **Vercel for the frontend**, a separately hosted **Python API with the model/data files**, and **Supabase Auth**. The [deployment guide](docs/DEPLOYMENT.md) includes:
 
 - Vercel root directory, build target, Node version, and environment variables.
+
 - Backend Docker commands and required artifacts.
+
 - Supabase redirect URLs, CORS, and email confirmation configuration.
+
 - Production smoke checks and common deployment errors.
 
 No deployment URL is claimed here until the project is deployed and verified. Actual credentials belong in the hosting provider's environment settings, not in Git.
@@ -222,5 +238,5 @@ The source dataset and descriptor methodology are from **MdrDB**, not generated 
 For changes to inference or training, include the feature contract, preprocessing changes, validation method, and reproducible results. Keep generated scores separate from illustrative content. Report software errors with model/tier, input identifiers, and the response status; do not include passwords or tokens.
 
 A project-wide software license has not yet been selected. Public availability does not imply unrestricted reuse. Dataset, publications, libraries, and other third-party assets retain their own terms; verify those before redistribution or publication.
-#   A I - M L p r o j e c t  
- 
+
+Repository label: AI-MLproject

@@ -1,4 +1,4 @@
-﻿import { useDashboard } from "@/hooks/use-dashboard";
+import { useDashboard } from "@/features/dashboard/use-dashboard";
 export function Tiers() {
   const { data, loading } = useDashboard();
   const ready = data?.models.filter((model) => model.status === "uploaded") ?? [];

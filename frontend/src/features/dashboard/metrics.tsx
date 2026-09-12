@@ -1,5 +1,5 @@
-﻿import { useState } from "react";
-import { useDashboard, modelLabels } from "@/hooks/use-dashboard";
+import { useState } from "react";
+import { useDashboard, modelLabels } from "@/features/dashboard/use-dashboard";
 const columns = ["R2", "RMSE", "MAE", "Pearson", "Spearman"];
 export function Metrics() {
   const { data, loading } = useDashboard();

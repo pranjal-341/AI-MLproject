@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useDashboard, apiBase, modelLabels } from "@/hooks/use-dashboard";
+import { useDashboard, apiBase, modelLabels } from "@/features/dashboard/use-dashboard";
 import { supabase } from "@/integrations/supabase/client";
 type Identity = {
   protein_id: string;

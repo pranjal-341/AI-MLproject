@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { useDashboard } from "@/hooks/use-dashboard";
-import { Reveal } from "@/components/reveal";
+import { useDashboard } from "@/features/dashboard/use-dashboard";
+import { Reveal } from "@/components/motion/reveal";
 
 export function Hero() {
   const { data } = useDashboard();

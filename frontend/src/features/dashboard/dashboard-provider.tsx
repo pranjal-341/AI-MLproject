@@ -1,5 +1,10 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
-import { apiBase, DashboardContext, useDashboard, type Dashboard } from "@/hooks/use-dashboard";
+import {
+  apiBase,
+  DashboardContext,
+  useDashboard,
+  type Dashboard,
+} from "@/features/dashboard/use-dashboard";
 
 export function DashboardProvider({ children }: { children: ReactNode }) {
   const [data, setData] = useState<Dashboard | null>(null);

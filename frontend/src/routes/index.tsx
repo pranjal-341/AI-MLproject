@@ -1,12 +1,12 @@
-import { DashboardProvider, DashboardStatus } from "@/components/dashboard-provider";
+import { DashboardProvider, DashboardStatus } from "@/features/dashboard/dashboard-provider";
 import { createFileRoute } from "@tanstack/react-router";
-import { SiteHeader } from "@/components/site-header";
-import { Hero } from "@/components/hero";
-import { Tiers } from "@/components/tiers";
-import { Metrics } from "@/components/metrics";
-import { Algorithms } from "@/components/algorithms";
-import { Researcher } from "@/components/researcher";
-import { Scope } from "@/components/scope";
+import { SiteHeader } from "@/components/layout/site-header";
+import { Hero } from "@/features/landing/hero";
+import { Tiers } from "@/features/catalog/tiers";
+import { Metrics } from "@/features/dashboard/metrics";
+import { Algorithms } from "@/features/catalog/algorithms";
+import { Researcher } from "@/features/prediction/researcher";
+import { Scope } from "@/features/landing/scope";
 
 const title = "OncoBind-ML — Predicting mutation-induced protein–drug binding changes";
 const description =

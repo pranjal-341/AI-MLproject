@@ -1,4 +1,4 @@
-﻿import { useDashboard, modelLabels } from "@/hooks/use-dashboard";
+import { useDashboard, modelLabels } from "@/features/dashboard/use-dashboard";
 export function Algorithms() {
   const { data, loading } = useDashboard();
   const algorithms = [...new Set(data?.models.map((model) => model.algorithm) ?? [])];

@@ -17,7 +17,7 @@ from backend.app.core import config
 from backend.app.services.notebook_model import engineer_features
 from backend.training import export
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 ALGORITHMS = {"linear_regression": "02_linear_regression", "decision_tree": "03_decision_tree", "random_forest": "04_random_forest"}
 
 

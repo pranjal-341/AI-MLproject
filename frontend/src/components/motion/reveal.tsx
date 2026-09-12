@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type ElementType, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
-export function useInView<T extends HTMLElement>(options?: { threshold?: number; rootMargin?: string }) {
+function useInView<T extends HTMLElement>(options?: { threshold?: number; rootMargin?: string }) {
   const ref = useRef<T | null>(null);
   const [inView, setInView] = useState(false);
 
@@ -21,7 +21,10 @@ export function useInView<T extends HTMLElement>(options?: { threshold?: number;
           }
         }
       },
-      { threshold: options?.threshold ?? 0.15, rootMargin: options?.rootMargin ?? "0px 0px -8% 0px" },
+      {
+        threshold: options?.threshold ?? 0.15,
+        rootMargin: options?.rootMargin ?? "0px 0px -8% 0px",
+      },
     );
     io.observe(el);
     return () => io.disconnect();

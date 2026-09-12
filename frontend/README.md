@@ -1,4 +1,4 @@
-﻿# OncoBind-ML frontend
+# OncoBind-ML frontend
 
 React 19 and TanStack Start research dashboard with Tailwind CSS, Supabase authentication, live model evaluation, and a biological prediction console.
 
@@ -34,3 +34,9 @@ The hero headline uses Lora at a responsive 2.35-4.25 rem size. Manrope is used 
 ## Data and authentication
 
 Components share `/api/dashboard` with periodic refresh. Both prediction modes require a Supabase user token verified by FastAPI. The primary mode resolves exact MdrDB records; de novo descriptor generation is not implemented. Public browser environment variables must never contain Supabase secret/service-role keys.
+
+## Source organization
+
+`src/features/` groups application behavior into `auth`, `landing`, `catalog`, `dashboard`, and `prediction`. Route files compose those features. `src/components/` holds shared `layout`, `motion`, and `ui` building blocks; `src/hooks/` holds shared device hooks. Supabase adapters remain in `src/integrations/`.
+
+See the [project guide](../docs/PROJECT_GUIDE.md) for boundaries and the request flow.
