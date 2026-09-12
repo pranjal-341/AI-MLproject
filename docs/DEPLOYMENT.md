@@ -1,4 +1,4 @@
-﻿# Deployment: Vercel frontend + Python inference API
+# Deployment: Vercel frontend + Python inference API
 
 ## Deployment topology
 
@@ -12,7 +12,32 @@ This repository configures Vercel to deploy **the frontend**. It does not packag
 
 Vercel supports TanStack Start SSR through Nitro. The existing Lovable configuration already installs Nitro, so `frontend/vite.config.ts` sets its `vercel` preset without adding a second plugin. See [Vercel's TanStack Start guide](https://vercel.com/kb/guide/deploy-a-tanstack-start-app-to-vercel) and [Nitro's Vercel provider](https://nitro.build/deploy/providers/vercel).
 
-## 1. Prepare the Python backend
+## 1. Deploy the Python backend
+
+### Render: fix the existing service
+
+The reported deployment installed its dependencies successfully, then failed with `ModuleNotFoundError: No module named 'app'`. Its start command was `app.main:app`, but the package in this repository is `backend.app.main`. The log also selected Python 3.14.3; the saved artifact environment uses Python 3.13, pinned by `.python-version`.
+
+Push the latest project files to the branch connected to Render, including root `requirements.txt`, `.python-version`, and `render.yaml`. In the existing Render web service, set:
+
+| Render setting | Value |
+| --- | --- |
+| Runtime | Python 3 |
+| Root Directory | **Leave empty** (repository root) |
+| Build Command | `python -m pip install -r requirements.txt` |
+| Start Command | `python -m uvicorn backend.app.main:app --host 0.0.0.0 --port $PORT` |
+| Health Check Path | `/api/health` |
+| Environment: `PYTHON_VERSION` | `3.13.12` |
+
+Replace the old `requirements-trained.txt` build command. The single root `requirements.txt` lists dependencies directly. It includes the notebook and test tools as well as API dependencies to keep one installation file for the whole project; these tools add installation size but do not run during deployment. Both commands must run at the root so the backend package, dataset and models remain available together.
+
+Set the Supabase and CORS variables in the table below, then use **Manual Deploy > Clear build cache & deploy**. Confirm the new build uses Python 3.13.12 and the correct start command. An existing `PYTHON_VERSION` environment value takes precedence over `.python-version`, so replace any stale 3.14 value. See [Render's Python version settings](https://render.com/docs/python-version) and [FastAPI deployment guide](https://render.com/docs/deploy-fastapi).
+
+For a new Blueprint deployment, use the root `render.yaml` and supply the requested environment values. Adding this file alone does not change an existing service created manually. Review the service name and compute allocation when importing it. The Blueprint leaves the plan unspecified, preserving an existing service's plan; for a new service Render applies its default. See [Blueprint settings](https://render.com/docs/blueprint-spec). The full CSV and loaded models need more memory than their file sizes, so verify `/api/dashboard` under the chosen allocation before presenting the application.
+
+Keep the actual dataset and nine LR/DT/RF exports available in the checkout. If the host receives Git LFS pointers instead of files, fix asset provisioning before testing predictions. `/api/health` checks process liveness only; `/api/dashboard` reports model and dataset availability.
+
+### Docker alternative and research assets
 
 Obtain real research assets before building. A Git LFS pointer is not a usable CSV or model:
 
@@ -44,9 +69,9 @@ Deploy this image to your Python/container host. Configure its HTTPS endpoint an
 | `SUPABASE_SECRET_KEY` | Server-only alternative if no publishable key is supplied |
 | `CORS_ORIGINS` | Comma-separated exact frontend origins, e.g. `https://your-project.vercel.app,https://your-custom-domain.org` |
 | `PORT` | Provided by host, or 8000 |
-| `MODELS_DIR` | Optional absolute artifact directory if using a volume; default `/app/models` |
+| `MODELS_DIR` | Optional absolute artifact directory if using a volume; default `<repository-root>/models` (`/app/models` in Docker) |
 
-Do not append `/api` to the backend origin used by the frontend. Keep the CSV at `/app/data/raw/MdrDB_Full_Scraped.csv` in this image. Preserve the fitted-artifact dependency versions in `backend/requirements-trained.txt`; `requirements-inference.txt` applies these as constraints.
+Do not append `/api` to the backend origin used by the frontend. Keep the CSV at `/app/data/raw/MdrDB_Full_Scraped.csv` in this image. Preserve the fitted-artifact dependency versions in `requirements.txt`. The application runs directly from the source checkout.
 
 A green liveness check is not model readiness. Check `/api/dashboard` to verify actual model loading and dataset availability. Publish the entire artifact set together: `model.joblib`, `features.json`, `metrics.json`, `metadata.json`, and `sample_input.json`.
 
@@ -117,6 +142,9 @@ These are deployment checks; they do not establish scientific accuracy. Local AP
 
 | Symptom | Check |
 | --- | --- |
+| `ModuleNotFoundError: No module named 'app'` | Clear Render Root Directory and use `backend.app.main:app` in Start Command |
+| `requirements-trained.txt` not found | Use root `requirements.txt` and deploy the latest project commit |
+| Python version rejected / artifact dependency mismatch | Set Render `PYTHON_VERSION=3.13.12`, then clear the build cache and redeploy |
 | GitHub rejects a large file | Follow [GitHub / LFS setup](GITHUB.md); the raw CSV exceeds the regular Git file limit |
 | Vercel cannot find `package.json` | Root Directory must be `frontend` |
 | Build creates Cloudflare output | Verify Nitro `preset: "vercel"`; remove an externally configured `LOVABLE_NITRO_PRESET`/Lovable build mode from your Vercel project |

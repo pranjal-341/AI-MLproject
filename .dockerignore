@@ -15,3 +15,8 @@ tests
 data/processed
 data/sample
 **/*.log
+
+# Local build products and documentation
+*.egg-info
+build
+docs

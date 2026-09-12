@@ -1,0 +1,20 @@
+# Backend only. Vercel's project root remains frontend/.
+# Keep Render's Root Directory empty so backend/, models/ and data/ are available.
+# Plan omitted: retain the existing plan or review the provider's default and
+# memory allocation before creating a new service.
+services:
+  - type: web
+    name: oncobind-api
+    runtime: python
+    buildCommand: python -m pip install -r requirements.txt
+    startCommand: python -m uvicorn backend.app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.13.12
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_PUBLISHABLE_KEY
+        sync: false
+      - key: CORS_ORIGINS
+        sync: false

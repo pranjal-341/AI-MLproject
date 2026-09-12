@@ -1,0 +1,24 @@
+# Python 3.13.12 (see .python-version). Run from the repository root.
+# Direct versions match the practical-v1 model environment; not a transitive lockfile.
+
+# API and model inference
+fastapi==0.141.1
+uvicorn==0.52.4
+pydantic==2.13.5
+numpy==2.5.3
+pandas==2.3.3
+scikit-learn==1.9.0
+scipy==1.18.1
+joblib==1.6.0
+xgboost==3.4.1
+httpx==0.28.1
+python-dotenv==1.2.3
+
+# Notebook training and research reports
+matplotlib==3.11.1
+nbformat==5.11.1
+nbclient==0.11.0
+ipykernel==7.3.0
+
+# Tests
+pytest==9.1.1

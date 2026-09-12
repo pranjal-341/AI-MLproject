@@ -1,4 +1,4 @@
-﻿# Contributing to OncoBind-ML
+# Contributing to OncoBind-ML
 
 Read the [project guide](docs/PROJECT_GUIDE.md) before changing application structure. Keep changes focused on one behavior or research experiment.
 

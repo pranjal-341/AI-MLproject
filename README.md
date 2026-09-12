@@ -6,7 +6,7 @@ OncoBind-ML is a research application for estimating changes in protein-drug bin
 
 **Research prototype:** predictions are model estimates. The application is not clinically validated and does not recommend treatment.
 
-[Project guide](docs/PROJECT_GUIDE.md) | [Presentation](presentation/README.md) | [Quick start](#quick-start) | [Model evaluation](#model-evaluation) | [Architecture](#architecture) | [Vercel deployment](docs/DEPLOYMENT.md) | [Research methodology](research/methodology.md) | [Backend reference](backend/README.md)
+[Project guide](docs/PROJECT_GUIDE.md) | [Quick start](#quick-start) | [Model evaluation](#model-evaluation) | [Architecture](#architecture) | [Vercel deployment](docs/DEPLOYMENT.md) | [Research limitations](results/final/model_evaluation.md) | [Backend reference](backend/README.md)
 
 ## What works today
 
@@ -46,6 +46,10 @@ The Python backend must be reachable over HTTPS in production. Deploying the fro
 
 ```text
 OncoBind-ML/
+|-- requirements.txt           Python dependencies for API, research and tests
+|-- pytest.ini                 Python test configuration
+|-- .python-version            Python version for saved model compatibility
+|-- render.yaml                Render backend service configuration
 |-- frontend/                  Web application; Vercel project root
 |   |-- src/routes/            URL definitions and page composition
 |   |-- src/features/          Auth, landing, catalog, dashboard, prediction
@@ -62,18 +66,15 @@ OncoBind-ML/
 |-- models/                    Versioned algorithm/tier serving artifacts
 |-- notebooks/                 Source experiments by algorithm
 |-- results/                   Generated metrics, predictions, plots and reports
-|-- research/                  Methodology and references
 |-- tests/
 |   |-- unit/                  Isolated preprocessing checks
 |   `-- integration/           API, auth, biological flow and export checks
 |-- scripts/                   Common project task runner
 |-- docs/                      Architecture, development and deployment guides
-|-- presentation/              Demo runbook, input example, screenshots and slides
-|-- database/                  Supabase ownership notes (no password database)
 `-- .github/workflows/         Automated checks
 ```
 
-For a classroom walkthrough, start with the [project guide](docs/PROJECT_GUIDE.md) and [demo runbook](presentation/DEMO.md). The [documentation index](docs/README.md) links each technical area.
+For a classroom walkthrough, start with the [project guide](docs/PROJECT_GUIDE.md). Hosting instructions live in the [deployment guide](docs/DEPLOYMENT.md).
 
 ## Quick start
 
@@ -87,7 +88,17 @@ For a classroom walkthrough, start with the [project guide](docs/PROJECT_GUIDE.m
 
 - A Supabase project with email/password authentication configured.
 
-The dependency versions recorded with the supplied models are in [requirements-trained.txt](backend/requirements-trained.txt). Preserve compatible scikit-learn/joblib versions when loading these artifacts.
+The dependency versions recorded with the supplied models are in [requirements.txt](requirements.txt). Preserve compatible scikit-learn/joblib versions when loading these artifacts.
+
+### Python dependencies
+
+Run these from the project root using your Python 3.13 virtual environment:
+
+```sh
+python -m pip install -r requirements.txt
+```
+
+The single root [requirements.txt](requirements.txt) lists dependencies directly, grouped into API/inference, notebook training, and tests. The same installation command is used locally and on Render. Test settings live in `pytest.ini`; run Python module commands from the repository root.
 
 ### 1. Obtain the research assets
 
@@ -106,11 +117,11 @@ From the repository root in PowerShell:
 
 ```powershell
 py -3.13 -m venv venv
-.\venv\Scripts\python.exe -m pip install -r backend/requirements-inference.txt
+.\venv\Scripts\python.exe -m pip install -r requirements.txt
 Copy-Item .env.example .env
 ```
 
-On Linux/macOS, use `python3.13 -m venv venv`, `venv/bin/python -m pip install -r backend/requirements-inference.txt`, and `cp .env.example .env`.
+On Linux/macOS, use `python3.13 -m venv venv`, `venv/bin/python -m pip install -r requirements.txt`, and `cp .env.example .env`.
 
 Edit `.env` with your actual Supabase project URL and publishable key. The restricted auth gateway also supports a server-only `SUPABASE_SECRET_KEY` if a publishable key is unavailable. Never put a secret/service-role key in a `VITE_` variable. If `.env` already exists, edit it rather than overwriting it.
 
@@ -180,7 +191,7 @@ Scores are transcribed from [all_models_comparison.csv](results/final/all_models
 Install development/training dependencies:
 
 ```powershell
-.\venv\Scripts\python.exe -m pip install -r backend/requirements-training.txt -c backend/requirements-trained.txt
+.\venv\Scripts\python.exe -m pip install -r requirements.txt
 .\venv\Scripts\python.exe -m pytest tests -q
 .\venv\Scripts\python.exe -m backend.training.verify
 ```
@@ -217,7 +228,7 @@ Use **Vercel for the frontend**, a separately hosted **Python API with the model
 
 - Vercel root directory, build target, Node version, and environment variables.
 
-- Backend Docker commands and required artifacts.
+- Render backend settings, Python version, Docker alternative, and required artifacts.
 
 - Supabase redirect URLs, CORS, and email confirmation configuration.
 

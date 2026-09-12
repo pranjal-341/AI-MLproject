@@ -4,6 +4,19 @@
 
 The uploaded dataset contains 100,537 rows and 168 columns. LR, DT and RF tiers A/B/C are trained and exported with the reproducible `practical-v1` profile; see `results/training_status.json` for the run details. XGBoost is pending its notebook. Full original notebook tuning remains available separately.
 
+## Backend deployment
+
+The only `requirements.txt` is in the **repository root**. It directly lists the API, model inference, training, and test dependencies. Use Python **3.13.12** and run both commands from the repository root:
+
+```sh
+python -m pip install -r requirements.txt
+python -m uvicorn backend.app.main:app --host 0.0.0.0 --port $PORT
+```
+
+`$PORT` above is supplied by Render's Linux runtime; for local PowerShell use `--port 8000`. On Render, leave **Root Directory empty**, set `PYTHON_VERSION=3.13.12`, and use `/api/health` as the health check. The old `app.main:app` command fails with `ModuleNotFoundError` from this layout. Saved estimators also reference `backend.app.services.notebook_model`, so retain this package structure.
+
+The root [render.yaml](../render.yaml) describes the service. For an existing manually configured service, update its dashboard settings explicitly and redeploy the latest commit. See the [deployment guide](../docs/DEPLOYMENT.md) for exact settings, credentials, model assets, and Vercel integration.
+
 ## Login and signup
 
 Supabase Auth stores accounts and passwords in its managed authentication system. No separate password table or MdrDB upload to Supabase is needed. The MdrDB dataset stays local for training.
@@ -16,7 +29,7 @@ Start the backend, then start the frontend (commands below). Choose **Sign in / 
 
 `POST /api/predict` and model sample routes require a Supabase user access token in `Authorization: Bearer <token>`. The backend checks it with the configured Supabase Auth server on every request and rejects missing, invalid and anonymous sessions. Merely hiding a button does not provide this protection. Auth and prediction responses use `Cache-Control: no-store`.
 
-The backend `.env` loads automatically. Restart both servers after configuration changes. The gateway eliminates the need for a matching browser publishable key. If you later want direct Supabase client access instead, put `SUPABASE_PUBLISHABLE_KEY=sb_publishable_...` in the root `.env` and run `python -m backend.configure_supabase`, then restart the frontend.
+The backend `.env` loads automatically. Restart both servers after configuration changes. The gateway eliminates the need for a matching browser publishable key. If you later want direct Supabase client access instead, put `SUPABASE_PUBLISHABLE_KEY=sb_publishable_...` in the root `.env` and run `python scripts/configure_supabase.py`, then restart the frontend.
 
 If email confirmation redirects to an unexpected address, set the Supabase Auth Site URL and allowed redirect URLs to your actual frontend origin. Running the frontend on localhost:3000 is convenient for the default local setup. Signup confirmation mail is handled by Supabase; no account or email was created during automated checks.
 
@@ -37,7 +50,7 @@ This bounded profile does not reproduce the notebooks' larger Yeo-Johnson, Lasso
 Run from the project root in PowerShell:
 
 ```powershell
-.\venv\Scripts\python.exe -m pip install -r backend/requirements-training.txt
+.\venv\Scripts\python.exe -m pip install -r requirements.txt
 .\venv\Scripts\python.exe -m backend.training.run LR
 .\venv\Scripts\python.exe -m backend.training.run DT
 .\venv\Scripts\python.exe -m backend.training.run RF
@@ -97,11 +110,11 @@ Use numbers or null for missing measurements. Every required key must be present
 .\venv\Scripts\python.exe -m pytest tests -q --basetemp=.pytest_cache/backend-tests
 ```
 
-Integration tests use temporary synthetic fixtures to check all nine inference/export paths and match feature functions against the uploaded notebooks. These are software checks, not scientific validation or real evaluation scores. See `research/methodology.md` for research limitations.
+Integration tests use temporary synthetic fixtures to check all nine inference/export paths and match feature functions against the uploaded notebooks. These are software checks, not scientific validation or real evaluation scores. See `results/final/model_evaluation.md` for research limitations.
 
 ## Completed report and artifact checks
 
-Generate comparison charts and a summary with `python -m backend.training.report`. Verify real exported samples through the API with `python -m backend.training.verify`; this check mocks user validation and does not create an account. Package versions for this run are in `backend/requirements-trained.txt`. Results are under `results/final/model_evaluation.md`, `results/final/api_verification.json`, and `results/plots/comparison/`.
+Generate comparison charts and a summary with `python -m backend.training.report`. Verify real exported samples through the API with `python -m backend.training.verify`; this check mocks user validation and does not create an account. Package versions for this run are in `requirements.txt`. Results are under `results/final/model_evaluation.md`, `results/final/api_verification.json`, and `results/plots/comparison/`.
 
 ## Dynamic frontend integration
 

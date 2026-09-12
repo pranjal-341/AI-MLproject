@@ -1,3 +1,0 @@
-# Use the dependency constraints recorded with the trained artifacts.
--r requirements.txt
--c requirements-trained.txt

@@ -14,3 +14,7 @@ frontend/.vercel/
 .coverage
 htmlcov/
 *.log
+
+# Local Python build artifacts
+*.egg-info/
+build/

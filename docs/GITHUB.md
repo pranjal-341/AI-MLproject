@@ -1,4 +1,4 @@
-﻿# GitHub publication and research assets
+# GitHub publication and research assets
 
 ## Before the first push
 
