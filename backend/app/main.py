@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .api import analytics, health, models, predict, auth, dashboard, biological, documents, assistant
 from .core.config import CORS_ORIGINS
+print("Loaded CORS origins:", CORS_ORIGINS, flush=True)
 
 app = FastAPI(title="OncoBind-ML API", version="0.1.0")
 app.add_middleware(CORSMiddleware, allow_origins=CORS_ORIGINS, allow_credentials=False, allow_methods=["GET", "POST"], allow_headers=["Content-Type", "Authorization", "apikey", "x-client-info", "x-supabase-api-version"])
