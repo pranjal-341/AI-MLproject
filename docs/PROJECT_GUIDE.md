@@ -11,7 +11,8 @@ This repository separates the running application from the experiments and their
 | Landing page | Hero illustration, headline and research scope | [`features/landing/`](../frontend/src/features/landing/) |
 | Model catalog | Algorithms and feature tiers | [`features/catalog/`](../frontend/src/features/catalog/) |
 | Dashboard | Shared live API state and evaluation tables | [`features/dashboard/`](../frontend/src/features/dashboard/) |
-| Prediction UI | Authenticated biological and advanced descriptor consoles | [`features/prediction/`](../frontend/src/features/prediction/) |
+| Prediction UI | Authenticated biological input console | [`features/prediction/`](../frontend/src/features/prediction/) |
+| Research chatbot | Floating chat, upload, editable descriptor review and DDG cards | [`features/research-assistant/`](../frontend/src/features/research-assistant/) |
 | Shared UI | Layout, animation and reusable UI primitives | [`components/`](../frontend/src/components/) |
 | Backend API | HTTP routes and authentication boundary | [`main.py`](../backend/app/main.py) |
 | Backend schemas | Input validation and response contracts | [`schemas/`](../backend/app/schemas/) |
@@ -112,6 +113,14 @@ Each algorithm contains `model_A/`, `model_B/`, and `model_C/` slots. A complete
 | `sample_input.json` | Exported input example |
 
 LR/DT/RF artifacts are available; XGBoost slots are pending. Joblib files use Git LFS. Keep the entire export consistent and retain the Python class path used in serialization. Use [export.py](../backend/training/export.py) and `python -m backend.training.verify` to validate inference parity. Never load untrusted joblib files.
+
+## Document-assisted input
+
+`backend/app/api/documents.py` protects and limits PDF/CSV imports. `services/pdf_text.py` extracts bounded PDF text in a child process; `services/descriptor_import.py` handles deterministic CSV parsing and evidence-checked Qwen output. `schemas/documents.py` defines extraction contracts. The chat/upload/review UI lives in `frontend/src/features/research-assistant/`. Its state hook coordinates import, editing, review and prediction; the dialog supplies the bottom-right launcher, mobile sizing and accessible controls.
+
+Uploads produce editable review drafts in the chatbot. After review, the chatbot calls the existing authenticated prediction endpoint and shows its numerical result separately from Qwen text. Source evidence and missing values stay visible; no descriptor generation or model retraining occurs. Tests in `tests/integration/test_documents.py` cover parser failures, auth, model versions, field validation and unsupported LLM output. Ordinary tests mock Ollama; live model checks are separate.
+
+Research Q&A uses `api/assistant.py`, `schemas/assistant.py` and `services/research_assistant.py`. The service checks current sample/model context and recomputes numerical results when explaining a completed prediction. It does not allow LLM text to execute tools or become a measurement. Chat and extraction share a generation lock. The old inline upload/descriptor panels have been replaced by this single assistant workflow.
 
 ## Research notebooks
 

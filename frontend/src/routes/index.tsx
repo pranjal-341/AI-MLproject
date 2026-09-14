@@ -1,3 +1,5 @@
+import { useState } from "react";
+import { ResearchAssistant } from "@/features/research-assistant/research-assistant";
 import { DashboardProvider, DashboardStatus } from "@/features/dashboard/dashboard-provider";
 import { createFileRoute } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/layout/site-header";
@@ -27,6 +29,7 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
+  const [assistantOpen, setAssistantOpen] = useState(false);
   return (
     <DashboardProvider>
       <div className="min-h-screen bg-background">
@@ -37,9 +40,10 @@ function Index() {
           <Tiers />
           <Metrics />
           <Algorithms />
-          <Researcher />
+          <Researcher onOpenAssistant={() => setAssistantOpen(true)} />
           <Scope />
         </main>
+        <ResearchAssistant open={assistantOpen} onOpenChange={setAssistantOpen} />
         <footer className="border-t border-line py-10">
           <div className="mx-auto flex max-w-[1200px] flex-col gap-2 px-6 sm:flex-row sm:items-center sm:justify-between">
             <span className="font-display text-[15px] font-semibold tracking-tight text-ink">

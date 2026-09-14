@@ -13,6 +13,7 @@ joblib==1.6.0
 xgboost==3.4.1
 httpx==0.28.1
 python-dotenv==1.2.3
+pypdf==6.18.1
 
 # Notebook training and research reports
 matplotlib==3.11.1

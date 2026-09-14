@@ -93,7 +93,7 @@ cd frontend
 npm.cmd run dev -- --port 3000
 ```
 
-The research console now calls the API instead of calculating simulated scores. Choose an exported model and paste the `features` object from its `sample_input.json`. The feature template contains nulls to replace with your measurements. Protein, mutation, and drug names alone are insufficient; molecular descriptor generation is not implemented.
+The floating research assistant calls the API for measured-descriptor prediction. Choose an exported model and upload a file, load its example, or enter measured values in the manual template. The HTTP prediction endpoint also accepts the `features` object from `sample_input.json`. Blank template entries remain null until supplied. Protein, mutation, and drug names alone are insufficient; molecular descriptor generation is not implemented.
 
 Frontend `VITE_API_BASE_URL` defaults to `http://127.0.0.1:8000`. Set it in the frontend environment if needed, then restart Vite. Backend `MODELS_DIR` overrides the artifact location; `CORS_ORIGINS` accepts comma-separated origins (localhost ports 3000, 5173, and 8080 by default). The backend loads the project-root .env automatically.
 
@@ -145,3 +145,37 @@ For unseen combinations, the remaining pipeline must resolve a protein structure
 Reference: https://github.com/tencent-quantum-lab/MdrDB and https://www.nature.com/articles/s42004-023-00920-7
 
 The biological endpoint reports MdrDB DDG in kcal/mol, as documented in the authors' tutorial: https://mutation-1300241787.cos.ap-shanghai.myqcloud.com/MdrDB_release/Tutorial/MdrDB_Tutorial_v1.0.2022.pdf . No numerical unit conversion is applied to the model output.
+
+## PDF and CSV descriptor import with local Qwen
+
+The signed-in **Ask OncoBind** chatbot at the bottom right contains the entire document workflow. Select a model (RF / Tier C by default), attach/drop one PDF or CSV, review or edit the extracted descriptors and their evidence, and click **Predict DDG** directly inside the chat. Manual entry and exported examples are also available.
+
+Install the updated root `requirements.txt` and keep Ollama running on the same computer as the backend. The existing defaults use `http://127.0.0.1:11434` and `qwen3:8b`; optional root `.env` overrides are `OLLAMA_BASE_URL` and `OLLAMA_MODEL`. No extra Python Ollama SDK or cloud API key is required. Check your installed model with `ollama list`; start the server with `ollama serve` only if it is not already running.
+
+- **CSV:** UTF-8, exact descriptor headers and exactly one sample row. Import is deterministic and does not call the LLM. The selected model determines the schema: tiers A/B/C currently require 51/57/146 raw descriptors. Unknown columns, including `DDG.EXP`, are ignored with a warning. Duplicate headers, extra rows, non-finite numbers, formulas and malformed rows are rejected. Blanks and explicit missing markers become null. Try `data/sample/demo_input.csv` with RF / Tier C.
+- **PDF:** selectable text, one sample, up to 2 MB, 12 pages and 16,000 extracted characters. Put exact descriptor names and measured numbers in name/value rows, for example `LIG.MolWt = 300.25`. The isolated pypdf worker has a 15-second timeout and a 512 MB memory limit on Linux. Windows uses the timeout without a hard process memory limit. Encrypted files, scanned image-only files, over-limit text and malformed files are rejected. There is no OCR or arbitrary multi-column table reconstruction.
+- **Qwen:** Ollama structured output selects candidate fields with page numbers and exact quotes. The backend independently checks feature names, numeric pairs, evidence presence and conflicting values. Unsupported candidates stay missing; they are never replaced by plausible values. Documents are treated as untrusted input, with no tools or commands available to the LLM. Full extraction can take minutes and times out after 180 seconds; one import runs at a time per API worker.
+- **Review:** extracted descriptors fill an editable draft in the chat. The user confirms one sample and compatible raw units before prediction. Missing fields require a separate acknowledgement. Editing a field clears the previous prediction and review acknowledgements. The existing predictor can impute partial missing values using its fitted preprocessing; this does not reconstruct molecular measurements. All-null inputs remain invalid. Import does not automatically submit a prediction.
+
+Authenticated endpoints:
+
+| Method | Path | Purpose |
+| --- | --- | --- |
+| GET | `/api/documents/status` | Check whether the configured local Ollama model is available |
+| POST | `/api/documents/extract` | Raw PDF/CSV body; query fields `algorithm`, `variant`, `model_version`, `filename`; returns a review draft |
+
+The response includes ordered features, missing names, source evidence, SHA-256 fingerprint and model version. A changed artifact returns 409; a concurrent import returns 429; unavailable or invalid LLM output returns 503. No upload files or extracted text are saved by application code. Requests still reach the configured backend and PDF text reaches its configured Ollama server, so account for host logging/retention separately.
+
+**Scientific boundary:** this improves data entry, not the trained model's measured accuracy. Qwen does not calculate DDG, generate docking/PLIP measurements, or infer 146 descriptors from a general paper, protein ID or mutation. LR/DT/RF remain responsible for numerical inference. Evidence checks reduce transcription errors but do not verify sample identity, measurement correctness, or units; user review remains necessary.
+
+Implementation references: [Ollama structured outputs](https://docs.ollama.com/capabilities/structured-outputs), [Ollama chat API](https://docs.ollama.com/api/chat), [pypdf text extraction limitations](https://pypdf.readthedocs.io/en/stable/user/extract-text.html).
+
+## Research chat and prediction explanations
+
+`POST /api/assistant/chat` requires the same authenticated Supabase user as prediction and import. It accepts `message` (up to 2,000 characters), up to eight `history` entries with `user`/`assistant` roles, optional versioned `sample` using the prediction request schema, and `explain_prediction` (default false). Context is bounded; arbitrary system roles, extra fields, target columns and stale model versions are rejected.
+
+General questions use local Qwen and do not run inference. When a reviewed prediction is present in the chatbot, follow-up questions pass that sample and request an explanation. The backend recomputes the result through its trained predictor before giving Qwen current numerical context (the verified result, coverage, and explicitly requested descriptor fields), and returns it separately as `verified_prediction`. It never trusts an LLM or client-supplied prediction number. The UI labels Qwen responses separately from trained-model cards. Generated explanations can still be wrong and should be checked.
+
+Chat and document import share one capacity lock per worker to avoid overlapping local-model jobs. Failure, timeout or busy states return clear errors; CSV import and ordinary prediction do not require Qwen to be online. No conversation database, browser persistence, external tools, browsing or arbitrary file access is added. Only the bounded recent conversation and the current validated descriptor sample are sent to the configured Ollama service. Minimizing the chatbot preserves its in-memory state; new chat, model changes and sign-out reset it. Closing the chatbot does not cancel an active request; starting a new chat aborts the browser request, although server-side work may finish before the slot is released.
+
+Validation is in `tests/integration/test_assistant.py`, including authentication, bounded/untrusted history, missing-feature context, independently computed predictions, model changes, shared capacity and malformed/offline LLM responses. [Ollama chat API reference](https://docs.ollama.com/api/chat).

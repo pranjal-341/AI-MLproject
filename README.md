@@ -14,6 +14,7 @@ OncoBind-ML is a research application for estimating changes in protein-drug bin
 | --- | --- |
 | Biological inputs | UniProt/PDB ID, mutation, and PubChem CID or exact dataset SMILES |
 | Descriptor preparation | Exact-record retrieval of precomputed MdrDB descriptors; optional PDB/chain/sample selection |
+| Research assistant | Floating Qwen chat with PDF/CSV uploads, descriptor review, and trained-model DDG prediction |
 | Inference | Nine fitted models: LR, DT, and RF, each with tiers A, B, and C |
 | Authentication | Supabase email signup/login; backend token validation protects prediction and sample routes |
 | Dashboard | Live dataset statistics, model readiness, feature schemas, and exported evaluation metrics |
@@ -22,7 +23,7 @@ OncoBind-ML is a research application for estimating changes in protein-drug bin
 | XGBoost | Awaiting a compatible trained export |
 | New molecular combinations | De novo structure preparation, PLIP, docking, and descriptor generation are **not implemented** |
 
-The primary form does not ask users to enter 146 values manually. When the input identifies a record in the supplied dataset, the backend retrieves its descriptors and runs the model. This is **not a new docking calculation**. Unknown combinations return an explanatory error instead of guessed descriptors. An advanced descriptor editor remains available for measured inputs.
+The primary form does not ask users to enter 146 values manually. When the input identifies a record in the supplied dataset, the backend retrieves its descriptors and runs the model. This is **not a new docking calculation**. Unknown combinations return an explanatory error instead of guessed descriptors. The floating research assistant supports PDF/CSV uploads. Manual measured-descriptor entry is available below the biological-input form under **Advanced: measured descriptor input (manual DDG prediction)**.
 
 ## Architecture
 
@@ -52,7 +53,7 @@ OncoBind-ML/
 |-- render.yaml                Render backend service configuration
 |-- frontend/                  Web application; Vercel project root
 |   |-- src/routes/            URL definitions and page composition
-|   |-- src/features/          Auth, landing, catalog, dashboard, prediction
+|   |-- src/features/          Auth, landing, catalog, dashboard, prediction, assistant
 |   |-- src/components/        Shared layout, motion and UI primitives
 |   |-- src/integrations/      Supabase and platform adapters
 |   `-- scripts/               Frontend deployment preflight and checks
@@ -157,6 +158,14 @@ Open `http://localhost:3000`. The example configuration uses the backend's restr
 4. Alternatively, enter a protein ID, mutation, and PubChem CID/SMILES. Select a specific sample if multiple structures match.
 
 The result separates the model prediction from the recorded experimental DDG. Both use the MdrDB target units, kcal/mol. A record in the source dataset may have participated in model fitting; its prediction is not independent evidence of generalization.
+
+### 5. Use the research chatbot
+
+Click the circular **Qx** launcher (**Ask OncoBind**) at the bottom right. Ask a research question, attach/drop a PDF or CSV, or try an exported sample. The default model is **RF / Tier C**, with 146 descriptors. Review/edit the extracted values, confirm the sample and missing-value handling, then click **Predict DDG** inside the chat. Use **Explain this result** for a Qwen explanation grounded in a freshly verified backend prediction. CSV needs exact feature headers and one sample row; `data/sample/demo_input.csv` works with RF / Tier C.
+
+The chatbot uses the site's white/teal theme, a Qx thinking animation, and a pill composer that expands to four lines. **Enter** sends; **Shift+Enter** adds a line. Suggestions fill the input for review before sending. Use the attachment menu to upload a file or download the selected model's **CSV template**; open **File requirements & privacy** for limits and the language-model connection details. The panel adapts to the visible mobile viewport and respects reduced-motion preferences. To enter descriptors manually, open **Advanced: measured descriptor input (manual DDG prediction)** below the biological-input form; choose a model and use the numeric form or JSON editor. Minimizing preserves the in-memory session. New chat, model changes and sign-out clear its sample/context. The biological-input form remains on the page.
+
+PDF extraction uses your local Ollama `qwen3:8b` model. Run Ollama on the backend computer and restart FastAPI after installing the updated `requirements.txt`. PDFs must contain selectable text and explicit descriptor/value pairs for one sample (2 MB, 12 pages maximum). An ordinary paper cannot provide missing molecular calculations. Missing fields remain null and are shown for review; Qwen never invents values or predicts DDG. See the [backend reference](backend/README.md#pdf-and-csv-descriptor-import-with-local-qwen).
 
 ## Model evaluation
 

@@ -2,7 +2,7 @@ import { BiologicalConsole } from "./biological-console";
 import { PredictionConsole } from "./descriptor-console";
 import { useAuth } from "@/features/auth/use-auth";
 
-export function Researcher() {
+export function Researcher({ onOpenAssistant }: { onOpenAssistant: () => void }) {
   const { session, loading, error } = useAuth();
   if (loading || !session || session.user.is_anonymous) {
     return (
@@ -40,10 +40,29 @@ export function Researcher() {
       <BiologicalConsole />
       <details className="mx-auto max-w-[1200px] px-6 pb-12">
         <summary className="cursor-pointer text-sm text-teal">
-          Advanced: measured descriptor input
+          Advanced: measured descriptor input (manual DDG prediction)
         </summary>
         <PredictionConsole />
       </details>
+      <div className="mx-auto max-w-[1200px] px-6 pb-12">
+        <div className="flex flex-col items-start justify-between gap-4 rounded-2xl border border-teal/15 bg-tealsoft/20 p-6 sm:flex-row sm:items-center">
+          <div>
+            <h3 className="text-sm font-semibold text-ink">
+              Have a descriptor file or a research question?
+            </h3>
+            <p className="mt-2 text-sm text-soft">
+              Upload, review, and predict in your research assistant.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={onOpenAssistant}
+            className="shrink-0 rounded-xl bg-teal px-5 py-3 text-sm font-medium text-background transition-transform hover:-translate-y-0.5 motion-reduce:transform-none"
+          >
+            Open research assistant
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

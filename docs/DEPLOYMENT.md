@@ -156,6 +156,16 @@ These are deployment checks; they do not establish scientific accuracy. Local AP
 | Model version conflict | Refresh the catalog, select/load the input again, then retry |
 | Cold first dashboard request | CSV parsing and model loading happen on first access; measure backend memory/startup time and keep sufficient resources |
 
+## Local LLM and hosted deployments
+
+The floating research chatbot uses `qwen3:8b` through Ollama for Q&A and PDF extraction, configured only on the backend with `OLLAMA_BASE_URL` and `OLLAMA_MODEL`. These are server settings, not `VITE_` variables. The default `http://127.0.0.1:11434` works when FastAPI and Ollama run on the same computer.
+
+Render's localhost belongs to the Render service, so it cannot reach Ollama installed on your laptop at that address. This repository does not install the 5.2 GB Qwen model on Render or run it inside Vercel. For a local presentation, run both FastAPI and Ollama locally. For hosted PDF extraction, provision a backend-reachable Ollama service with enough RAM/VRAM and private network access; configure its origin server-side. Do not expose an unauthenticated Ollama port to the public internet. If Ollama is unavailable, CSV import and trained-model prediction in the chatbot, and the manual descriptor console on the page, remain available; Q&A and PDF extraction report clear service errors.
+
+Uploads and chat are authenticated and share one request slot per API worker. Uploads are limited to 2 MB. Chat forwards only bounded recent messages and the current descriptor sample; conversations stay in browser memory for the session. PDF parsing is isolated with a timeout; Linux adds a memory cap. Configure proxy/body-size and request-timeout limits consistently: a full local-model extraction can take up to 180 seconds plus parsing. Application code does not save uploaded files or extracted text; check the hosting provider's own logging policies separately.
+
+See [Ollama networking and local operation](https://docs.ollama.com/faq) and the [implementation guide](../backend/README.md#pdf-and-csv-descriptor-import-with-local-qwen).
+
 ## Scope of repository setup
 
 Configuration and local build checks do not create a Vercel project, deploy an API host, set production secrets, or publish a live URL. Complete the provider settings above using your own accounts. The [current Vercel limits](https://vercel.com/docs/functions/limitations) should be checked if you later redesign the Python service for Vercel Functions.
